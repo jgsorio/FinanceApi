@@ -18,6 +18,18 @@ function verifyIfCustomerExists(request, response, next) {
     return next();
 }
 
+
+/**
+ * Faz o calculo total do saldo
+ */
+function getBalance(statements) {
+    let saldo = 0;
+    statements.forEach(statement => {
+        statement.type == 'Credit' ? saldo += statement.amount : saldo -= statement.amount;
+    });
+    return saldo;
+}
+
 /**
  * Criar usuário
  */
@@ -103,6 +115,15 @@ app.delete('/account', verifyIfCustomerExists, (request, response) => {
     const { customer } = request;
     customers.splice(customer, 1);
     return response.status(200).json({ message: "Usuário Deletado com Sucesso!" });
+});
+
+/**
+ * Trazer o saldo do client
+ */
+app.get('/balance', verifyIfCustomerExists, (request, response) => {
+    const { customer } = request;
+    const balance = getBalance(customer.statement);
+    return response.status(200).json(balance);
 });
 
 app.listen(3333);
